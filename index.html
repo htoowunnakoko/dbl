@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Myanmar Income Tax Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 40px;
+    }
+    .box {
+      max-width: 450px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #2c7be5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1a68d1;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Income Tax Calculator</h2>
+<p>
+  For DBL class. Section-20(c): Professional and Salary Income Tax. 
+</p>
+<p>
+နောက်ဆုံးအဆင့် percentage တွက်ရမဲ့ amount ပဲထည့်ရန်။ တစ်ဆင့်ချင်းစီ တွက်တာတော့ စိတ်ပါမှပဲ ထက်ထည့်တော့မယ်။ မှားရင်လဲ မှားမယ်။ သိဘူးရယ် xD
+</p>
+  <label><b>Net Taxable Income (MMK)</b></label>
+  <input type="number" id="income" placeholder="e.g. 510500000">
+
+  <button onclick="calculateTax()">Calculate Tax</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+function calculateTax() {
+  let income = Number(document.getElementById("income").value);
+  let tax = 0;
+
+  if (income > 70000000) {
+    tax += (income - 70000000) * 0.25;
+    income = 70000000;
+  }
+  if (income > 50000000) {
+    tax += (income - 50000000) * 0.20;
+    income = 50000000;
+  }
+  if (income > 30000000) {
+    tax += (income - 30000000) * 0.15;
+    income = 30000000;
+  }
+  if (income > 10000000) {
+    tax += (income - 10000000) * 0.10;
+    income = 10000000;
+  }
+  if (income > 2000000) {
+    tax += (income - 2000000) * 0.05;
+  }
+
+  document.getElementById("result").innerText =
+    "Total Income Tax Payable: " + tax.toLocaleString() + " MMK";
+}
+</script>
+
+</body>
+</html>
