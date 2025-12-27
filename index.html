@@ -2,154 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Income Tax Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Myanmar Income Tax Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 40px;
-    }
-    .box {
-      max-width: 460px;
+      max-width: 800px;
       margin: auto;
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      padding: 20px;
     }
-    h2 {
+    h2, h3 {
       text-align: center;
     }
-    .info {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      font-size: 16px;
+    .input-group {
+      margin: 10px 0;
     }
     label {
-      font-size: 15px;
+      margin-right: 10px;
     }
-    button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 15px;
-      font-size: 16px;
-      background: #2c7be5;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
+    input[type="number"] {
+      width: 150px;
     }
-    button:hover {
-      background: #1a68d1;
-    }
-    .result {
+    #totalAllowance, #taxableIncome, #taxBreakdown, #totalTax {
       margin-top: 20px;
-      font-weight: bold;
-      font-size: 16px;
-    }
-    .breakdown {
-      margin-top: 12px;
-      font-size: 14px;
-      background: #f9f9f9;
       padding: 10px;
-      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-<div class="box">
-  <h2>Income Tax Calculator</h2>
-<p>
-  For DBL class. Section-20(c): Professional and Salary Income Tax. 
-</p>
-<p>
-မှားရင်လဲ မှားမယ်။ သိဘူးရယ် xD
-</p>
- 
+  <h2>Myanmar Income Tax Calculator</h2>
+  <p>For DBL class. Section-20(c): Professional and Salary Income Tax</p>
+	<p>ကိုယ့်ဘာသာ အပျင်းထူဖို့ .. မှားရင်လဲ မှားမယ် .. သိဘူးရယ်</p>
 
-  <label><b>Net Taxable Income (MMK)</b></label>
-  <input type="number" id="income" placeholder="e.g. 510500000">
+  <div class="input-group">
+    <label>Net Taxable Income (MMK)</label>
+    <input type="number" id="netIncome" placeholder="Enter your net income">
+  </div>
 
-  <label style="display:block; margin-top:10px;">
-    <input type="checkbox" id="showBreakdown">
-    Show slab-by-slab breakdown
-  </label>
+  <div class="input-group">
+    <input type="checkbox" id="married">
+    <label for="married">Married (Spouse allowance)</label>
+  </div>
+
+  <div class="input-group">
+    <label>Living with parents:</label>
+    <input type="number" id="parents" min="0" value="0">
+  </div>
+
+  <div class="input-group">
+    <label>Number of children:</label>
+    <input type="number" id="children" min="0" value="0">
+  </div>
 
   <button onclick="calculateTax()">Calculate Tax</button>
 
-  <div class="result" id="result"></div>
-  <div class="breakdown" id="breakdown"></div>
-</div>
+  <!-- Total Allowance section -->
+  <div id="totalAllowance" class="hidden">
+    <h3>Total Allowance</h3>
+    <p id="basicAllowanceDisplay"></p>
+    <p id="spouseAllowanceDisplay"></p>
+    <p id="parentsAllowanceDisplay"></p>
+    <p id="childrenAllowanceDisplay"></p>
+  </div>
 
-<script>
-function calculateTax() {
-  let income = Number(document.getElementById("income").value);
-  let tax = 0;
-  let breakdownLines = [];
+  <!-- Taxable Income section -->
+  <div id="taxableIncome" class="hidden">
+    <h3>Taxable Income</h3>
+    <p id="taxableIncomeDisplay"></p>
+  </div>
 
+  <!-- Tax Breakdown section -->
+  <div id="taxBreakdown" class="hidden">
+    <h3>Tax Breakdown</h3>
+    <p id="taxBreakdownDisplay"></p>
+  </div>
 
-  function addLine(label, amount, rate, taxAmount) {
-  breakdownLines.push(
-    `${label}: ${amount.toLocaleString()} × ${rate}% = ${taxAmount.toLocaleString()} MMK`
-  );
-}
+  <!-- Total Tax section -->
+  <div id="totalTax" class="hidden">
+    <h3>Total Tax</h3>
+    <p id="totalTaxDisplay"></p>
+  </div>
 
-  if (income > 70000000) {
-    let amt = income - 70000000;
-    let t = amt * 0.25;
-    tax += t;
-    addLine("Above 70,000,000", amt, 25, t);
-    income = 70000000;
-  }
+  <script>
+    function calculateTax() {
+      const netIncome = Number(document.getElementById('netIncome').value);
+      const married = document.getElementById('married').checked;
+      const parents = Number(document.getElementById('parents').value);
+      const children = Number(document.getElementById('children').value);
 
-  if (income > 50000000) {
-    let amt = income - 50000000;
-    let t = amt * 0.20;
-    tax += t;
-    addLine("50,000,001 – 70,000,000", amt, 20, t);
-    income = 50000000;
-  }
+      // Basic Allowance: 20% capped at 10,000,000 MMK
+      let basicAllowance = Math.min(netIncome * 0.2, 10000000);
 
-  if (income > 30000000) {
-    let amt = income - 30000000;
-    let t = amt * 0.15;
-    tax += t;
-    addLine("30,000,001 – 50,000,000", amt, 15, t);
-    income = 30000000;
-  }
+      // Spouse allowance
+      let spouseAllowance = married ? 1000000 : 0;
 
-  if (income > 10000000) {
-    let amt = income - 10000000;
-    let t = amt * 0.10;
-    tax += t;
-    addLine("10,000,001 – 30,000,000", amt, 10, t);
-    income = 10000000;
-  }
+      // Parents allowance
+      let parentsAllowance = parents * 1000000;
 
-  if (income > 2000000) {
-    let amt = income - 2000000;
-    let t = amt * 0.05;
-    tax += t;
-    addLine("2,000,001 – 10,000,000", amt, 5, t);
-  }
+      // Children allowance
+      let childrenAllowance = children * 500000;
 
-  document.getElementById("result").innerHTML =
-    `Total Income Tax Payable: ${tax.toLocaleString()} MMK`;
+      // Total allowance
+      let totalAllowance = basicAllowance + spouseAllowance + parentsAllowance + childrenAllowance;
 
-  document.getElementById("breakdown").innerHTML =
-  document.getElementById("showBreakdown").checked
-    ? "<strong>Tax Breakdown:</strong><br>" + breakdownLines.reverse().join("<br>")
-    : "";
-}
-</script>
+      // Taxable income
+      let taxableIncome = netIncome - totalAllowance;
+      if (taxableIncome < 0) taxableIncome = 0;
+
+      // Display allowances
+      document.getElementById('basicAllowanceDisplay').innerText = `Basic Allowance: ${basicAllowance.toLocaleString()} MMK`;
+      document.getElementById('spouseAllowanceDisplay').innerText = `Spouse Allowance: ${spouseAllowance.toLocaleString()} MMK`;
+      document.getElementById('parentsAllowanceDisplay').innerText = `Parents Allowance: ${parentsAllowance.toLocaleString()} MMK`;
+      document.getElementById('childrenAllowanceDisplay').innerText = `Children Allowance: ${childrenAllowance.toLocaleString()} MMK`;
+      document.getElementById('totalAllowance').classList.remove('hidden');
+
+      // Display taxable income
+      document.getElementById('taxableIncomeDisplay').innerText = taxableIncome.toLocaleString() + " MMK";
+      document.getElementById('taxableIncome').classList.remove('hidden');
+
+      // Myanmar Tax Slabs
+      const slabs = [
+        { max: 2000000, rate: 0 },
+        { max: 10000000, rate: 0.05 },
+        { max: 30000000, rate: 0.10 },
+        { max: 50000000, rate: 0.15 },
+        { max: 70000000, rate: 0.20 },
+        { max: Infinity, rate: 0.25 }
+      ];
+
+      let remainingIncome = taxableIncome;
+      let previousMax = 0;
+      let taxBreakdown = [];
+      let totalTax = 0;
+
+      for (let i = 0; i < slabs.length; i++) {
+        let slabIncome = Math.min(remainingIncome, slabs[i].max - previousMax);
+        if (slabIncome > 0) {
+          let tax = slabIncome * slabs[i].rate;
+          taxBreakdown.push(`${(slabs[i].rate*100).toFixed(0)}% on ${slabIncome.toLocaleString()} = ${tax.toLocaleString()} MMK`);
+          totalTax += tax; // calculate total tax directly
+          remainingIncome -= slabIncome;
+        }
+        previousMax = slabs[i].max;
+      }
+
+      document.getElementById('taxBreakdownDisplay').innerHTML = taxBreakdown.join('<br>');
+      document.getElementById('taxBreakdown').classList.remove('hidden');
+
+      // Display total tax
+      document.getElementById('totalTaxDisplay').innerText = totalTax.toLocaleString() + " MMK";
+      document.getElementById('totalTax').classList.remove('hidden');
+    }
+  </script>
 
 </body>
 </html>
